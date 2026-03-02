@@ -2,38 +2,13 @@ const std = @import("std");
 
 const sdk = @import("mcu_sdk");
 
-const SerialTerminal = struct {
-    entry: sdk.Pci.Entry,
-    slot: u8 = 0,
+const SerialTerminal = sdk.utils.PciDevice(sdk.SerialTerminal, .serial_terminal);
+const Signaler = sdk.utils.PciDevice(sdk.Signaler, .signaler);
 
-    pub inline fn mmio(this: SerialTerminal) *volatile sdk.SerialTerminal {
-        return @ptrFromInt(this.entry.address);
-    }
-};
-
-const Signaler = struct {
-    entry: sdk.Pci.Entry,
-    slot: u8 = 0,
-
-    pub inline fn mmio(this: Signaler) *volatile sdk.Signaler {
-        return @ptrFromInt(this.entry.address);
-    }
-};
-
-inline fn findDevice(comptime T: type, comptime pci_type: sdk.Pci.DeviceType) ?T {
-    for (&sdk.pci.status().entries, 0..) |entry, slot| {
-        if (entry.ty == pci_type) {
-            return .{ .entry = entry, .slot = @intCast(slot) };
-        }
-    }
-
-    return null;
-}
-
-pub const MIN_FREQ: u16 = 1200;
-pub const MAX_FREQ: u16 = 1600;
-pub const MIN_CODE: u8 = 1;
-pub const MAX_CODE: u8 = 100;
+const MIN_FREQ: u16 = 1200;
+const MAX_FREQ: u16 = 1600;
+const MIN_CODE: u8 = 1;
+const MAX_CODE: u8 = 100;
 
 const C = struct {
     const reset = "\x1b[0m";
@@ -423,8 +398,8 @@ const Shell = struct {
 };
 
 pub fn main() void {
-    const terminal = findDevice(SerialTerminal, .serial_terminal) orelse return;
-    const signaler = findDevice(Signaler, .signaler) orelse return;
+    const terminal = SerialTerminal.find() orelse return;
+    const signaler = Signaler.find() orelse return;
 
     var shell = Shell.init(terminal, signaler);
     shell.run();

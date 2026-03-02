@@ -1,29 +1,8 @@
 const std = @import("std");
+
 const sdk = @import("mcu_sdk");
 
-const SerialTerminal = struct {
-    entry: sdk.Pci.Entry,
-    slot: u8 = 0,
-
-    pub inline fn mmio(this: SerialTerminal) *volatile sdk.SerialTerminal {
-        return @ptrFromInt(this.entry.address);
-    }
-};
-
-inline fn getSerialTerminal() ?SerialTerminal {
-    for (&sdk.pci.status().entries, 0..) |entry, slot| {
-        if (entry.ty != .serial_terminal) {
-            continue;
-        }
-
-        return .{
-            .entry = entry,
-            .slot = @intCast(slot),
-        };
-    }
-
-    return null;
-}
+const SerialTerminal = sdk.utils.PciDevice(sdk.SerialTerminal, .serial_terminal);
 
 // ANSI escape codes
 const C = struct {
@@ -392,7 +371,7 @@ const Shell = struct {
 };
 
 pub fn main() void {
-    const terminal = getSerialTerminal() orelse return;
+    const terminal = SerialTerminal.find() orelse return;
     var shell = Shell.init(terminal);
 
     shell.run();

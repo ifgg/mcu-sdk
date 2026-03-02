@@ -368,3 +368,24 @@ pub const SerialTerminalWriter = struct {
         this.flushTerminal();
     }
 };
+
+pub fn PciDevice(comptime T: type, comptime ty: sdk.Pci.DeviceType) type {
+    return struct {
+        entry: sdk.Pci.Entry,
+        slot: u8 = 0,
+
+        pub inline fn mmio(this: *const @This()) *volatile T {
+            return @ptrFromInt(this.entry.address);
+        }
+
+        pub inline fn find() ?@This() {
+            for (&sdk.pci.status().entries, 0..) |entry, slot| {
+                if (entry.ty == ty) {
+                    return .{ .entry = entry, .slot = @intCast(slot) };
+                }
+            }
+
+            return null;
+        }
+    };
+}

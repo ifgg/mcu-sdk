@@ -247,6 +247,7 @@ pub const Pci = extern struct {
         tts = 1,
         serial_terminal = 2,
         signaler = 3,
+        gps = 4,
         _,
     };
 
@@ -541,5 +542,19 @@ pub const Signaler = extern struct {
 
     pub inline fn ack(this: *volatile Signaler) void {
         this.action().ack = 1;
+    }
+};
+
+pub const Gps = extern struct {
+    pub const Status = extern struct {
+        x: i16 = 0,
+        y: i16 = 0,
+        z: i16 = 0,
+    };
+
+    _status: Status = .{},
+
+    pub inline fn status(this: *volatile Gps) *volatile Status {
+        return &this._status;
     }
 };

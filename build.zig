@@ -26,6 +26,8 @@ pub fn build(b: *std.Build) void {
     addGuestExecutable(b, sdk, "examples/sensors", "sensors");
     addGuestExecutable(b, sdk, "examples/serial_terminal", "serial_terminal");
     addGuestExecutable(b, sdk, "examples/signaler", "signaler");
+    addGuestExecutable(b, sdk, "examples/gps", "gps");
+    addGuestExecutable(b, sdk, "examples/plug_and_play", "plug_and_play");
 }
 
 const riscv32Query: std.Target.Query = .{
