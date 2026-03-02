@@ -16,6 +16,11 @@ pub const Memory = struct {
         std.debug.assert(SENSORS >= BOOT_INFO + @sizeOf(BootInfo));
     }
 
+    pub const POWER = 0x0000_3000;
+    comptime {
+        std.debug.assert(POWER >= SENSORS + @sizeOf(Sensors));
+    }
+
     pub const CLINT = 0x0200_0000;
 
     pub const PRNG = 0x0C00_2000;
@@ -57,6 +62,12 @@ pub const Sensors = extern struct {
 };
 
 pub const sensors: *volatile Sensors = @ptrFromInt(Memory.SENSORS);
+
+pub const Power = extern struct {
+    /// mWh
+    battery_charge: u32 = 0,
+    has_external_source: bool = false,
+};
 
 pub const Clint = extern struct {
     pub const Config = extern struct {
